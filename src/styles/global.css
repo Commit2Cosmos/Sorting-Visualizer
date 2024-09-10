@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --main-color: rgb(3, 105, 161);
+    --bar-color: rgb(153, 25, 213);
+}
+
+@layer components {
+    h1 {
+        @apply text-3xl text-black;
+    }
+    h2 {
+        @apply text-3xl;
+    }
+    h3 {
+        @apply text-2xl
+    }
+    h4 {
+        @apply text-xl
+    }
+
+    .vertical-bar {
+        writing-mode: bt-lr; /* IE */
+        -webkit-appearance: slider-vertical; /* Chromium */
+        appearance: slider-vertical;
+    }
+}
