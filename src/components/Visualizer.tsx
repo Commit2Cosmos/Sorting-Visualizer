@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const Visualizer = () => {
 
-    const [arrSize, setArrSize] = useState(40);
+    const [arrSize, setArrSize] = useState(10);
     const [array, setArray] = useState(new Array(arrSize));
     const [algorithm, setAlgorithm] = useState(0);
-    const [speed, setSpeed] = useState(200);
+    const [speed, setSpeed] = useState(1);
     const [loading, setLoading] = useState(false);
+
+    const barsRef = useRef<(HTMLDivElement | null)[]>([]);
 
     
     const algorithms = [
@@ -17,19 +19,18 @@ const Visualizer = () => {
         {name: 'Merge', description: 'This is merge sort'},
     ];
 
+
+    //* Create a ref for each bar 
+    const setBarRef = (el: HTMLDivElement | null, idx: number) => {
+        barsRef.current[idx] = el;
+    };
+
     
     //* Generate new array
     const randomize = () => {
-        let arr: number[] = Array(arrSize);
         const min = 5;
         const max = 100;
-
-        for (let i = 0; i < arrSize; i++) {
-            const rand = Math.floor(Math.random() * (max - min + 1) + min);
-            arr[i] = rand;
-            const bar = document.getElementById(`${i}`)?.style;
-            if (bar) bar.backgroundColor = `var(--bar-color)`;
-        }
+        let arr: number[] = new Array(arrSize).fill(0).map(() => Math.floor(Math.random() * (max - min + 1) + min));
         setArray(arr);
     }
 
@@ -45,11 +46,6 @@ const Visualizer = () => {
         setAlgorithm(index);
     }
 
-    // Generate new array on initial render
-    useEffect(() => {
-        randomize();
-    }, [])
-
     useEffect(() => {
         randomize();
     }, [arrSize])
@@ -61,8 +57,6 @@ const Visualizer = () => {
             case 'Bubble':
                 bubbleSort();
                 break
-        }
-        switch (algorithms[algorithm].name) {
             case 'Quick':
                 bubbleSort();
                 break
@@ -70,57 +64,58 @@ const Visualizer = () => {
     }
 
     // fake promise to inroduce delay between swaps
-    const freeze = (ms: number) => {
-        return new Promise((resolve) => setTimeout(resolve, ms));
+    const freeze = (delay = speed) => {
+        return new Promise((resolve) => setTimeout(resolve, delay));
     }
 
     const finishAnim = async () => {
         for (let i = 0; i < array.length; i++) {
-            const bar = document.getElementById(`${i}`)?.style;
-            bar!.backgroundColor = 'green';
-            await freeze(speed);
+            const bar = barsRef.current[i];
+            bar!.style.backgroundColor = 'green';
+            await freeze();
         }
         setLoading(false);
     }
 
     // BUBBLE SORT
     const bubbleSort = async () => {
-        let curr = array;
+        let curr = [...array];
         let sorted = false;
 
         while (!sorted) {
-            sorted = true;
-
+            
             for (let i = 0; i < curr.length - 1; i++) {
+                sorted = true;
                 for (let j = 0; j < curr.length - i - 1; j++) {
 
-                    let bar1 = document.getElementById(`${j}`)!.style
-                    let bar2 = document.getElementById(`${j + 1}`)!.style
+                    let bar1 = barsRef.current[j];
+                    let bar2 = barsRef.current[j+1];
+
+                    bar1!.style.backgroundColor = '#6A5ACD';
+                    bar2!.style.backgroundColor = '#DC143C';
+
+                    await freeze();
 
                     if (curr[j] > curr[j + 1]) {
-                        let temp = curr[j]
-                        curr[j] = curr[j + 1]
-                        curr[j + 1] = temp
-                        console.log(array)
-                        setArray([...curr])
+
+                        [curr[j], curr[j + 1]] = [curr[j + 1], curr[j]];
+
+                        setArray([...curr]);
                         
                         // current element
-                        bar1.backgroundColor = '#DC143C'
+                        bar1!.style.backgroundColor = '#DC143C';
                         // next element
-                        bar2.backgroundColor = '#6A5ACD'
+                        bar2!.style.backgroundColor = '#6A5ACD';
             
-                        await freeze(speed);
-                        console.log(array)
-
-                        bar1.backgroundColor = `var(--bar-color)`;
-                        bar2.backgroundColor = `var(--bar-color)`;
-
-                        await freeze(speed);
+                        await freeze();
                         
-                        
-
                         sorted = false
                     }
+                    
+                    bar1!.style.backgroundColor = `var(--bar-color)`;
+                    bar2!.style.backgroundColor = `var(--bar-color)`;
+
+                    await freeze();
                 }
             }
         }
@@ -141,7 +136,7 @@ const Visualizer = () => {
             let partitionIndex = partition(arr, left, right)
         
             setArray([...arr]);
-            await freeze(speed);
+            await freeze();
 
             await sorts(arr, left, partitionIndex - 1)
             await sorts(arr, partitionIndex + 1, right)
@@ -166,7 +161,7 @@ const Visualizer = () => {
                 bar1.backgroundColor = '#DC143C';
                 bar2.backgroundColor = '#6A5ACD';
 
-                freeze(speed);
+                freeze();
 
                 bar1.backgroundColor = '#ff7f50';
                 bar2.backgroundColor = '#ff7f50';
@@ -187,15 +182,16 @@ const Visualizer = () => {
         <div className="absolute w-full h-full flex flex-col items-center gap-10">
             <div className="mt-2 outline w-[90%] h-[70%] flex gap-10 items-center">
                 {/*  */}
-                <input className="vertical-bar h-52 outline w-6" type="range" min="20" max="100" value={array.length} disabled={loading} onChange={(e) => setArrSize(parseInt(e.target.value))} />
+                <input className="vertical-bar h-52 outline w-6" type="range" min="10" max="100" value={array.length} disabled={loading} onChange={(e) => setArrSize(parseInt(e.target.value))} />
                 {/* Bars */}
                 <div className="w-full h-full flex gap-1">
                     {array.map((value, key) => (
                         <div
                         className="bg-[var(--bar-color)] self-end" 
-                        id={`${key}`} 
-                        key={key} 
+                        id={key.toString()}
+                        key={key}
                         style={{ height: `${value}%`, width: `${100/arrSize}%` }}
+                        ref={el => setBarRef(el, key)}
                         ></div>
                     ))}
                 </div>
@@ -225,9 +221,9 @@ const Visualizer = () => {
             <div className="w-full flex flex-col items-center">
                 <p>Speed</p>
                 <div className="w-full flex justify-center">
-                    <p>20</p>
-                    <input className="mx-5" type="range" min="20" max="300" value={speed} onChange={(e) => setSpeed(parseInt(e.target.value))} />
-                    <p>300</p>
+                    <p>1</p>
+                    <input className="mx-5" type="range" min="1" max="500" value={speed} onChange={(e) => setSpeed(parseInt(e.target.value))} />
+                    <p>500</p>
                 </div>
             </div>
         </div>
