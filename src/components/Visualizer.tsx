@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from "react";
 
 const Visualizer = () => {
 
-    const [arrSize, setArrSize] = useState(100);
+    const [arrSize, setArrSize] = useState(10);
     const [array, setArray] = useState(new Array(arrSize));
-    const [algorithm, setAlgorithm] = useState(0);
+    const [algorithm, setAlgorithm] = useState("Bubble");
     const [speed, setSpeed] = useState(1);
     const [loading, setLoading] = useState(false);
 
@@ -39,7 +39,9 @@ const Visualizer = () => {
         setArray(arr);
 
         barsRef.current.forEach((bar) => {
-            changeColour(bar!);
+            if (bar) {
+                changeColour(bar);
+            }
         });
     }
 
@@ -50,23 +52,23 @@ const Visualizer = () => {
     // }
 
 
-    const handleAlgo = (index: number) => {
-        // const group = document.getElementById("group")?.style;
-        // console.log(group?.display);
-        // group!.display = 'none';
-        setAlgorithm(index);
+    const handleAlgo = (algo_name: string) => {
+        if (algorithms.map(x => x.name).includes(algo_name)) {
+            setAlgorithm(algo_name);
+        }
     }
 
 
+    //* Reset array if size is changed
     useEffect(() => {
         randomize();
     }, [arrSize])
 
 
-    // Sort on click
+    //* Sort on click
     const handleSorting = () => {
         setLoading(true);
-        switch (algorithms[algorithm].name) {
+        switch (algorithm) {
             case 'Bubble':
                 bubbleSort();
                 break
@@ -77,7 +79,7 @@ const Visualizer = () => {
     }
 
 
-    // fake promise to inroduce delay between swaps
+    //* Fake promise to inroduce delay between swaps
     const freeze = (delay = speed) => {
         return new Promise((resolve) => setTimeout(resolve, delay));
     }
@@ -104,8 +106,7 @@ const Visualizer = () => {
                 sorted = true;
                 for (let j = 0; j < curr.length - i - 1; j++) {
 
-                    let bar1 = barsRef.current[j]!;
-                    let bar2 = barsRef.current[j+1]!;
+                    let [bar1, bar2] = [barsRef.current[j]!, barsRef.current[j+1]!];
 
                     changeColour(bar1, "#6A5ACD");
                     changeColour(bar2, "#DC143C");
@@ -214,11 +215,11 @@ const Visualizer = () => {
             <div className="flex text-lg font-semibold text-white gap-10">
                 {/* Dropdown selection */}
                 <div className="relative bg-green-700 w-40 group hover:bg-emerald-500">
-                    <p className="p-2 text-center">{algorithms[algorithm].name} Sort</p>
+                    <p className="p-2 text-center">{algorithm} Sort</p>
                     <div className="absolute top-0 -translate-y-44 hidden bg-[#f1f1f1] z-10 w-full group-hover:block" id="group">
                         {algorithms.map((alg, index) => {
-                            if (index !== algorithm) {
-                                return <button key={index} disabled={loading} className="text-black p-2 block hover:bg-slate-600 hover:text-white" onClick={() => handleAlgo(index)}>{alg.name} Sort</button>
+                            if (alg.name !== algorithm) {
+                                return <button key={index} disabled={loading} className="text-black p-2 block hover:bg-slate-600 hover:text-white" onClick={() => handleAlgo(alg.name)}>{alg.name} Sort</button>
                             }
                         })}
                     </div>
