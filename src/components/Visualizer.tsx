@@ -1,23 +1,23 @@
 import { useState, useEffect, useRef } from "react";
 
+
+const initAlgorithms = [
+    {name: 'Bubble', description: 'This is bubble sort'},
+    {name: 'Quick', description: 'This is quick sort'},
+    {name: 'Selection', description: 'This is selection sort'},
+    {name: 'Insertion', description: 'This is insertion sort'},
+    {name: 'Merge', description: 'This is merge sort'},
+];
+
 const Visualizer = () => {
 
     const [arrSize, setArrSize] = useState(10);
     const [array, setArray] = useState(new Array(arrSize));
-    const [algorithm, setAlgorithm] = useState("Bubble");
+    const [algorithms, setAlgorithms] = useState(initAlgorithms);
     const [speed, setSpeed] = useState(1);
     const [loading, setLoading] = useState(false);
 
     const barsRef = useRef<(HTMLDivElement | null)[]>([]);
-
-    
-    const algorithms = [
-        {name: 'Bubble', description: 'This is bubble sort'},
-        {name: 'Quick', description: 'This is quick sort'},
-        {name: 'Selection', description: 'This is selection sort'},
-        {name: 'Insertion', description: 'This is insertion sort'},
-        {name: 'Merge', description: 'This is merge sort'},
-    ];
 
 
     //* Create a ref for each bar 
@@ -46,16 +46,15 @@ const Visualizer = () => {
     }
 
 
-    //* Shuffle array
-    // const handleShuffle = () => {
-
-    // }
-
-
     const handleAlgo = (algo_name: string) => {
-        if (algorithms.map(x => x.name).includes(algo_name)) {
-            setAlgorithm(algo_name);
-        }
+        setAlgorithms(x => {
+            const currentIndex = x.findIndex(c => c.name === algo_name);
+            const updatedAlgorithms = [...x];
+
+            [updatedAlgorithms[0], updatedAlgorithms[currentIndex]] = [updatedAlgorithms[currentIndex], updatedAlgorithms[0]];
+
+            return updatedAlgorithms;
+        });
     }
 
 
@@ -68,7 +67,7 @@ const Visualizer = () => {
     //* Sort on click
     const handleSorting = () => {
         setLoading(true);
-        switch (algorithm) {
+        switch (algorithms[0].name) {
             case 'Bubble':
                 bubbleSort();
                 break
@@ -85,6 +84,7 @@ const Visualizer = () => {
     }
 
 
+    //* Run after sorting the array
     const finishAnim = async () => {
         for (let i = 0; i < array.length; i++) {
             const bar = barsRef.current[i];
@@ -215,10 +215,10 @@ const Visualizer = () => {
             <div className="flex text-lg font-semibold text-white gap-10">
                 {/* Dropdown selection */}
                 <div className="relative bg-green-700 w-40 group hover:bg-emerald-500">
-                    <p className="p-2 text-center">{algorithm} Sort</p>
+                    <p className="p-2 text-center">{algorithms[0].name} Sort</p>
                     <div className="absolute top-0 -translate-y-44 hidden bg-[#f1f1f1] z-10 w-full group-hover:block" id="group">
                         {algorithms.map((alg, index) => {
-                            if (alg.name !== algorithm) {
+                            if (alg.name !== algorithms[0].name) {
                                 return <button key={index} disabled={loading} className="text-black p-2 block hover:bg-slate-600 hover:text-white" onClick={() => handleAlgo(alg.name)}>{alg.name} Sort</button>
                             }
                         })}
