@@ -7,3 +7,4 @@
 - Change colour back to default after resetting the sorted array
 - Add the rest of sorts
 - Ability to change speed while it's sorting
+- Change algorithm to have a string -> name of algo

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 
 const Visualizer = () => {
 
-    const [arrSize, setArrSize] = useState(10);
+    const [arrSize, setArrSize] = useState(100);
     const [array, setArray] = useState(new Array(arrSize));
     const [algorithm, setAlgorithm] = useState(0);
     const [speed, setSpeed] = useState(1);
@@ -25,6 +25,11 @@ const Visualizer = () => {
         barsRef.current[idx] = el;
     };
 
+
+    const changeColour = (bar: HTMLElement, color: string = "var(--bar-color)") => {
+        bar!.style.backgroundColor = color;
+    }
+
     
     //* Generate new array
     const randomize = () => {
@@ -32,12 +37,18 @@ const Visualizer = () => {
         const max = 100;
         let arr: number[] = new Array(arrSize).fill(0).map(() => Math.floor(Math.random() * (max - min + 1) + min));
         setArray(arr);
+
+        barsRef.current.forEach((bar) => {
+            changeColour(bar!);
+        });
     }
 
-    // Shuffle array
+
+    //* Shuffle array
     // const handleShuffle = () => {
 
     // }
+
 
     const handleAlgo = (index: number) => {
         // const group = document.getElementById("group")?.style;
@@ -46,9 +57,11 @@ const Visualizer = () => {
         setAlgorithm(index);
     }
 
+
     useEffect(() => {
         randomize();
     }, [arrSize])
+
 
     // Sort on click
     const handleSorting = () => {
@@ -63,10 +76,12 @@ const Visualizer = () => {
         }
     }
 
+
     // fake promise to inroduce delay between swaps
     const freeze = (delay = speed) => {
         return new Promise((resolve) => setTimeout(resolve, delay));
     }
+
 
     const finishAnim = async () => {
         for (let i = 0; i < array.length; i++) {
@@ -77,7 +92,8 @@ const Visualizer = () => {
         setLoading(false);
     }
 
-    // BUBBLE SORT
+
+    //* BUBBLE SORT
     const bubbleSort = async () => {
         let curr = [...array];
         let sorted = false;
@@ -88,11 +104,11 @@ const Visualizer = () => {
                 sorted = true;
                 for (let j = 0; j < curr.length - i - 1; j++) {
 
-                    let bar1 = barsRef.current[j];
-                    let bar2 = barsRef.current[j+1];
+                    let bar1 = barsRef.current[j]!;
+                    let bar2 = barsRef.current[j+1]!;
 
-                    bar1!.style.backgroundColor = '#6A5ACD';
-                    bar2!.style.backgroundColor = '#DC143C';
+                    changeColour(bar1, "#6A5ACD");
+                    changeColour(bar2, "#DC143C");
 
                     await freeze();
 
@@ -102,18 +118,16 @@ const Visualizer = () => {
 
                         setArray([...curr]);
                         
-                        // current element
-                        bar1!.style.backgroundColor = '#DC143C';
-                        // next element
-                        bar2!.style.backgroundColor = '#6A5ACD';
+                        changeColour(bar1, "#DC143C");
+                        changeColour(bar2, "#6A5ACD");
             
                         await freeze();
                         
                         sorted = false
                     }
                     
-                    bar1!.style.backgroundColor = `var(--bar-color)`;
-                    bar2!.style.backgroundColor = `var(--bar-color)`;
+                    changeColour(bar1);
+                    changeColour(bar2);
 
                     await freeze();
                 }
@@ -131,51 +145,51 @@ const Visualizer = () => {
     //     finishAnim();
     // }
         
-    const sorts = async (arr: number[], left: number, right: number) => {
-        if (left < right) {
-            let partitionIndex = partition(arr, left, right)
+    // const sorts = async (arr: number[], left: number, right: number) => {
+    //     if (left < right) {
+    //         let partitionIndex = partition(arr, left, right)
         
-            setArray([...arr]);
-            await freeze();
+    //         setArray([...arr]);
+    //         await freeze();
 
-            await sorts(arr, left, partitionIndex - 1)
-            await sorts(arr, partitionIndex + 1, right)
-        }
-    }
+    //         await sorts(arr, left, partitionIndex - 1)
+    //         await sorts(arr, partitionIndex + 1, right)
+    //     }
+    // }
 
-    const partition = (arr: number[], left: number, right: number) => {
-        let pivot = arr[right];
-        let i = left - 1;
+    // const partition = (arr: number[], left: number, right: number) => {
+    //     let pivot = arr[right];
+    //     let i = left - 1;
 
-        for (let j = left; j < right; j++) {
-            if (arr[j] < pivot) {
+    //     for (let j = left; j < right; j++) {
+    //         if (arr[j] < pivot) {
 
-                i++;
+    //             i++;
 
-                let temp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = temp;
+    //             let temp = arr[i];
+    //             arr[i] = arr[j];
+    //             arr[j] = temp;
 
-                let bar1 = document.getElementById(`${i}`)!.style;
-                let bar2 = document.getElementById(`${j}`)!.style;
-                bar1.backgroundColor = '#DC143C';
-                bar2.backgroundColor = '#6A5ACD';
+    //             let bar1 = document.getElementById(`${i}`)!.style;
+    //             let bar2 = document.getElementById(`${j}`)!.style;
+    //             bar1.backgroundColor = '#DC143C';
+    //             bar2.backgroundColor = '#6A5ACD';
 
-                freeze();
+    //             freeze();
 
-                bar1.backgroundColor = '#ff7f50';
-                bar2.backgroundColor = '#ff7f50';
+    //             bar1.backgroundColor = '#ff7f50';
+    //             bar2.backgroundColor = '#ff7f50';
         
-                setArray([...arr]);
-            }
-        }
+    //             setArray([...arr]);
+    //         }
+    //     }
 
-        let temp = arr[i + 1];
-        arr[i + 1] = arr[right];
-        arr[right] = temp;
+    //     let temp = arr[i + 1];
+    //     arr[i + 1] = arr[right];
+    //     arr[right] = temp;
     
-        return i + 1;
-    }
+    //     return i + 1;
+    // }
     
 
     return (
