@@ -15,7 +15,12 @@ const Visualizer = () => {
     const [array, setArray] = useState(new Array(arrSize));
     const [algorithms, setAlgorithms] = useState(initAlgorithms);
     const [speed, setSpeed] = useState(1);
+    const speedRef = useRef(speed);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        speedRef.current = speed;
+    }, [speed]);
 
     const barsRef = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -79,7 +84,7 @@ const Visualizer = () => {
 
 
     //* Fake promise to inroduce delay between swaps
-    const freeze = (delay = speed) => {
+    const freeze = (delay = speedRef.current) => {
         return new Promise((resolve) => setTimeout(resolve, delay));
     }
 
