@@ -27,3 +27,13 @@
         appearance: slider-vertical;
     }
 }
+
+@layer utilities {
+    .outline-all, .outline-all > * {
+        outline: 2px dashed red;
+    }
+
+    .dial {
+        @apply font-semibold
+    }
+}

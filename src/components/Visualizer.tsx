@@ -196,22 +196,36 @@ const Visualizer = () => {
     
     //     return i + 1;
     // }
+
+    //* bar number range
+    const min_bars = 10;
+    const max_bars = 100;
+
+
+    //* speed range (ms)
+    const min_speed = 1;
+    const max_speed = 500;
     
 
     return (
         <div className="absolute w-full h-full flex flex-col items-center gap-10">
-            <div className="mt-2 outline w-[90%] h-[70%] flex gap-10 items-center">
-                {/*  */}
-                <input className="vertical-bar h-52 outline w-6" type="range" min="10" max="100" value={array.length} disabled={loading} onChange={(e) => setArrSize(parseInt(e.target.value))} />
+            <div className="mt-2 w-[90%] h-[70%] flex gap-10 outline-all">
+                {/* Number of bars */}
+                <div className="h-full flex flex-col justify-center items-center gap-2">
+                    <p className="dial">More</p>
+                    <input className="vertical-bar h-2/3 w-10" type="range" min={min_bars} max={max_bars} value={array.length} disabled={loading} onChange={(e) => setArrSize(parseInt(e.target.value))} />
+                    <p className="dial">Less</p>
+                </div>
+
                 {/* Bars */}
                 <div className="w-full h-full flex gap-1">
                     {array.map((value, key) => (
                         <div
-                        className="bg-[var(--bar-color)] self-end" 
-                        id={key.toString()}
-                        key={key}
-                        style={{ height: `${value}%`, width: `${100/arrSize}%` }}
-                        ref={el => setBarRef(el, key)}
+                            className="bg-[var(--bar-color)] self-end" 
+                            id={key.toString()}
+                            key={key}
+                            style={{ height: `${value}%`, width: `${100/arrSize}%` }}
+                            ref={el => setBarRef(el, key)}
                         ></div>
                     ))}
                 </div>
@@ -221,11 +235,9 @@ const Visualizer = () => {
                 {/* Dropdown selection */}
                 <div className="relative bg-green-700 w-40 group hover:bg-emerald-500">
                     <p className="p-2 text-center">{algorithms[0].name} Sort</p>
-                    <div className="absolute top-0 -translate-y-44 hidden bg-[#f1f1f1] z-10 w-full group-hover:block" id="group">
-                        {algorithms.map((alg, index) => {
-                            if (alg.name !== algorithms[0].name) {
-                                return <button key={index} disabled={loading} className="text-black p-2 block hover:bg-slate-600 hover:text-white" onClick={() => handleAlgo(alg.name)}>{alg.name} Sort</button>
-                            }
+                    <div className="absolute top-0 -translate-y-full hidden bg-[#f1f1f1] z-10 w-full group-hover:block" id="group">
+                        {algorithms.filter(sort => sort.name !== algorithms[0].name).map((alg, index) => {
+                            return <button key={index} disabled={loading} className="w-full text-black p-2 block hover:bg-slate-600 hover:text-white" onClick={() => handleAlgo(alg.name)}>{alg.name} Sort</button>
                         })}
                     </div>
                 </div>
@@ -241,9 +253,9 @@ const Visualizer = () => {
             <div className="w-full flex flex-col items-center">
                 <p>Speed</p>
                 <div className="w-full flex justify-center">
-                    <p>1</p>
-                    <input className="mx-5" type="range" min="1" max="500" value={speed} onChange={(e) => setSpeed(parseInt(e.target.value))} />
-                    <p>500</p>
+                    <p className="dial">Fast</p>
+                    <input className="mx-5 w-2/5" type="range" min={min_speed} max={max_speed} value={speed} onChange={(e) => setSpeed(parseInt(e.target.value))} />
+                    <p className="dial">Slow</p>
                 </div>
             </div>
         </div>
