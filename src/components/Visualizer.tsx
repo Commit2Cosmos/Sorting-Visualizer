@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef } from "react";
+import { changeColour, freeze } from "./algorithms/utils";
+import bubbleSort from "./algorithms/bubble";
+import quickSort from "./algorithms/quick";
 
 
 const initAlgorithms = [
-    {name: 'Bubble', description: 'This is bubble sort'},
-    {name: 'Quick', description: 'This is quick sort'},
-    {name: 'Selection', description: 'This is selection sort'},
-    {name: 'Insertion', description: 'This is insertion sort'},
-    {name: 'Merge', description: 'This is merge sort'},
+    'Bubble',
+    'Quick',
+    // 'Selection',
+    // 'Insertion',
+    // 'Merge',
 ];
 
 const Visualizer = () => {
@@ -14,26 +17,15 @@ const Visualizer = () => {
     const [arrSize, setArrSize] = useState(10);
     const [array, setArray] = useState(new Array(arrSize));
     const [algorithms, setAlgorithms] = useState(initAlgorithms);
-    const [speed, setSpeed] = useState(1);
+    const [speed, setSpeed] = useState(100);
     const speedRef = useRef(speed);
     const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        speedRef.current = speed;
-    }, [speed]);
-
     const barsRef = useRef<(HTMLDivElement | null)[]>([]);
-
 
     //* Create a ref for each bar 
     const setBarRef = (el: HTMLDivElement | null, idx: number) => {
         barsRef.current[idx] = el;
     };
-
-
-    const changeColour = (bar: HTMLElement, color: string = "var(--bar-color)") => {
-        bar!.style.backgroundColor = color;
-    }
 
     
     //* Generate new array
@@ -53,7 +45,7 @@ const Visualizer = () => {
 
     const handleAlgo = (algo_name: string) => {
         setAlgorithms(x => {
-            const currentIndex = x.findIndex(c => c.name === algo_name);
+            const currentIndex = x.findIndex(c => c === algo_name);
             const updatedAlgorithms = [...x];
 
             [updatedAlgorithms[0], updatedAlgorithms[currentIndex]] = [updatedAlgorithms[currentIndex], updatedAlgorithms[0]];
@@ -68,24 +60,22 @@ const Visualizer = () => {
         randomize();
     }, [arrSize])
 
+    useEffect(() => {
+        speedRef.current = speed;
+    }, [speed]);
+
 
     //* Sort on click
     const handleSorting = () => {
         setLoading(true);
-        switch (algorithms[0].name) {
+        switch (algorithms[0]) {
             case 'Bubble':
-                bubbleSort();
+                bubbleSort(array, barsRef, freeze, speedRef, changeColour, setArray, finishAnim);
                 break
             case 'Quick':
-                bubbleSort();
+                quickSort(array, barsRef, freeze, speedRef, changeColour, setArray, finishAnim);
                 break
         }
-    }
-
-
-    //* Fake promise to inroduce delay between swaps
-    const freeze = (delay = speedRef.current) => {
-        return new Promise((resolve) => setTimeout(resolve, delay));
     }
 
 
@@ -94,108 +84,10 @@ const Visualizer = () => {
         for (let i = 0; i < array.length; i++) {
             const bar = barsRef.current[i];
             bar!.style.backgroundColor = 'green';
-            await freeze();
+            await freeze(speedRef.current);
         }
         setLoading(false);
     }
-
-
-    //* BUBBLE SORT
-    const bubbleSort = async () => {
-        let curr = [...array];
-        let sorted = false;
-
-        while (!sorted) {
-            
-            for (let i = 0; i < curr.length - 1; i++) {
-                sorted = true;
-                for (let j = 0; j < curr.length - i - 1; j++) {
-
-                    let [bar1, bar2] = [barsRef.current[j]!, barsRef.current[j+1]!];
-
-                    changeColour(bar1, "#6A5ACD");
-                    changeColour(bar2, "#DC143C");
-
-                    await freeze();
-
-                    if (curr[j] > curr[j + 1]) {
-
-                        [curr[j], curr[j + 1]] = [curr[j + 1], curr[j]];
-
-                        setArray([...curr]);
-                        
-                        changeColour(bar1, "#DC143C");
-                        changeColour(bar2, "#6A5ACD");
-            
-                        await freeze();
-                        
-                        sorted = false
-                    }
-                    
-                    changeColour(bar1);
-                    changeColour(bar2);
-
-                    await freeze();
-                }
-            }
-        }
-        finishAnim();
-    }
-
-    
-    // QUICK SORT
-    // const quickSort = async () => {
-    //     let curr = array;
-    
-    //     await sorts(curr, 0, curr.length - 1);
-    //     finishAnim();
-    // }
-        
-    // const sorts = async (arr: number[], left: number, right: number) => {
-    //     if (left < right) {
-    //         let partitionIndex = partition(arr, left, right)
-        
-    //         setArray([...arr]);
-    //         await freeze();
-
-    //         await sorts(arr, left, partitionIndex - 1)
-    //         await sorts(arr, partitionIndex + 1, right)
-    //     }
-    // }
-
-    // const partition = (arr: number[], left: number, right: number) => {
-    //     let pivot = arr[right];
-    //     let i = left - 1;
-
-    //     for (let j = left; j < right; j++) {
-    //         if (arr[j] < pivot) {
-
-    //             i++;
-
-    //             let temp = arr[i];
-    //             arr[i] = arr[j];
-    //             arr[j] = temp;
-
-    //             let bar1 = document.getElementById(`${i}`)!.style;
-    //             let bar2 = document.getElementById(`${j}`)!.style;
-    //             bar1.backgroundColor = '#DC143C';
-    //             bar2.backgroundColor = '#6A5ACD';
-
-    //             freeze();
-
-    //             bar1.backgroundColor = '#ff7f50';
-    //             bar2.backgroundColor = '#ff7f50';
-        
-    //             setArray([...arr]);
-    //         }
-    //     }
-
-    //     let temp = arr[i + 1];
-    //     arr[i + 1] = arr[right];
-    //     arr[right] = temp;
-    
-    //     return i + 1;
-    // }
 
     //* bar number range
     const min_bars = 10;
@@ -234,10 +126,10 @@ const Visualizer = () => {
             <div className="flex text-lg font-semibold text-white gap-10">
                 {/* Dropdown selection */}
                 <div className="relative bg-green-700 w-40 group hover:bg-emerald-500">
-                    <p className="p-2 text-center">{algorithms[0].name} Sort</p>
+                    <p className="p-2 text-center">{algorithms[0]} Sort</p>
                     <div className="absolute top-0 -translate-y-full hidden bg-[#f1f1f1] z-10 w-full group-hover:block" id="group">
-                        {algorithms.filter(sort => sort.name !== algorithms[0].name).map((alg, index) => {
-                            return <button key={index} disabled={loading} className="w-full text-black p-2 block hover:bg-slate-600 hover:text-white" onClick={() => handleAlgo(alg.name)}>{alg.name} Sort</button>
+                        {algorithms.filter(sort => sort !== algorithms[0]).map((alg, index) => {
+                            return <button key={index} disabled={loading} className="w-full text-black p-2 block hover:bg-slate-600 hover:text-white" onClick={() => handleAlgo(alg)}>{alg} Sort</button>
                         })}
                     </div>
                 </div>
@@ -253,9 +145,9 @@ const Visualizer = () => {
             <div className="w-full flex flex-col items-center">
                 <p>Speed</p>
                 <div className="w-full flex justify-center">
-                    <p className="dial">Fast</p>
-                    <input className="mx-5 w-2/5" type="range" min={min_speed} max={max_speed} value={speed} onChange={(e) => setSpeed(parseInt(e.target.value))} />
                     <p className="dial">Slow</p>
+                    <input className="mx-5 w-2/5" type="range" min={min_speed} max={max_speed} value={speed} onChange={(e) => setSpeed(parseInt(e.target.value))} />
+                    <p className="dial">Fast</p>
                 </div>
             </div>
         </div>
