@@ -10,11 +10,7 @@ const quickSort = async (array, barsRef, freeze, speedRef, changeColour, setArra
     
 const sorts = async (arr, left, right, extraArgs) => {
     if (left < right) {
-        let partitionIndex = await partition(arr, left, right, extraArgs);
-
-        const { setArray } = extraArgs;
-    
-        setArray([...arr]);
+        let partitionIndex = await partition(arr, left, right, extraArgs);    
 
         await sorts(arr, partitionIndex + 1, right, extraArgs)
         await sorts(arr, left, partitionIndex - 1, extraArgs)
@@ -28,43 +24,52 @@ const partition = async (arr: number[], left: number, right: number, extraArgs) 
     let pivotBar = barsRef.current![right];
     changeColour(pivotBar, "#4d88ff");
     await freeze(speedRef.current);
-
+    
     let i = left - 1;
 
-
+    let barLeft = barsRef.current![i+1];
+    
     for (let j = left; j < right; j++) {
+        changeColour(barLeft, "#6A5ACD");
 
-        let [bar1, bar2] = [barsRef.current![j], barsRef.current![j+1]];
-
-        changeColour(bar1, "#6A5ACD");
-        changeColour(bar2, "#DC143C");
-
+        let barRight = barsRef.current![j];
+        changeColour(barRight, "#6A5ACD");
         await freeze(speedRef.current);
-
-        if (arr[j] < pivot) {
-
-            i++;
-
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-
-            setArray([...arr]);
-
-            changeColour(bar1, "#DC143C");
-            changeColour(bar2, "#6A5ACD");
-
-            await freeze(speedRef.current);
-        }
-
-        changeColour(bar1);
-        changeColour(bar2);
         
+        if (arr[j] < pivot) {
+            
+            i++;
+            if (i!=j) {
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+                setArray([...arr]);
+
+                changeColour(barLeft, "#DC143C");
+                changeColour(barRight, "#DC143C");
+                await freeze(speedRef.current);
+                changeColour(barLeft);
+            }
+            
+            barLeft = barsRef.current![i+1];
+        }
+        changeColour(barLeft, "#6A5ACD");
+        changeColour(barRight);
         await freeze(speedRef.current);
     }
 
-    changeColour(pivotBar);
-    await freeze(speedRef.current);
+    changeColour(barLeft);
 
-    [arr[i+1], arr[right]] = [arr[right], arr[i+1]];
+    if (i+1 != right) {
+        [arr[i+1], arr[right]] = [arr[right], arr[i+1]];
+        setArray([...arr]);
+    
+        changeColour(barLeft, "#DC143C");
+        changeColour(pivotBar, "#DC143C");
+        await freeze(speedRef.current);
+        
+        changeColour(barLeft);
+        changeColour(pivotBar);
+        await freeze(speedRef.current);
+    }
 
     return i + 1;
 }
