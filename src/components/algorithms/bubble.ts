@@ -1,4 +1,8 @@
-const bubbleSort = async (array, barsRef, freeze, speedRef, changeColour, setArray, finishAnim) => {
+// BUBBLE SORT
+
+import { changeColour, freeze } from "../utils";
+
+const bubbleSort = async (array, barsRef, speedRef, setArray, finishAnim) => {
     let curr = [...array];
     let sorted = false;
 

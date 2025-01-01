@@ -1,23 +1,24 @@
 import { useState, useEffect, useRef } from "react";
-import { changeColour, freeze } from "./algorithms/utils";
 import bubbleSort from "./algorithms/bubble";
 import quickSort from "./algorithms/quick";
+import selectionSort from "./algorithms/selection";
+import { freeze, changeColour } from "./utils";
 
 
 const initAlgorithms = [
+    'Selection',
     'Bubble',
     'Quick',
-    // 'Selection',
     // 'Insertion',
     // 'Merge',
 ];
 
 const Visualizer = () => {
 
-    const [arrSize, setArrSize] = useState(10);
+    const [arrSize, setArrSize] = useState(30);
     const [array, setArray] = useState(new Array(arrSize));
     const [algorithms, setAlgorithms] = useState(initAlgorithms);
-    const [speed, setSpeed] = useState(100);
+    const [speed, setSpeed] = useState(50);
     const speedRef = useRef(speed);
     const [loading, setLoading] = useState(false);
     const barsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -70,10 +71,13 @@ const Visualizer = () => {
         setLoading(true);
         switch (algorithms[0]) {
             case 'Bubble':
-                bubbleSort(array, barsRef, freeze, speedRef, changeColour, setArray, finishAnim);
+                bubbleSort(array, barsRef, speedRef, setArray, finishAnim);
                 break
             case 'Quick':
-                quickSort(array, barsRef, freeze, speedRef, changeColour, setArray, finishAnim);
+                quickSort(array, barsRef, speedRef, setArray, finishAnim);
+                break
+            case 'Selection':
+                selectionSort(array, barsRef, speedRef, setArray, finishAnim);
                 break
         }
     }
@@ -146,7 +150,7 @@ const Visualizer = () => {
                 <p>Speed</p>
                 <div className="w-full flex justify-center">
                     <p className="dial">Slow</p>
-                    <input className="mx-5 w-2/5" type="range" min={min_speed} max={max_speed} value={speed} onChange={(e) => setSpeed(parseInt(e.target.value))} />
+                    <input className="mx-5 w-2/5" type="range" min={min_speed} max={max_speed} value={max_speed - (speed - min_speed)} onChange={(e) => setSpeed(max_speed - (parseInt(e.target.value) - min_speed))} />
                     <p className="dial">Fast</p>
                 </div>
             </div>

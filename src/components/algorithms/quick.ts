@@ -1,8 +1,11 @@
 // QUICK SORT
-const quickSort = async (array, barsRef, freeze, speedRef, changeColour, setArray, finishAnim) => {
+
+import { changeColour, freeze } from "../utils";
+
+const quickSort = async (array, barsRef, speedRef, setArray, finishAnim) => {
     let curr = [...array];
 
-    const extraArgs = { barsRef, freeze, speedRef, changeColour, setArray, finishAnim };
+    const extraArgs = { barsRef, speedRef, setArray, finishAnim };
 
     await sorts(curr, 0, curr.length - 1, extraArgs);
     finishAnim();
@@ -18,7 +21,7 @@ const sorts = async (arr, left, right, extraArgs) => {
 }
 
 const partition = async (arr: number[], left: number, right: number, extraArgs) => {
-    const { barsRef, changeColour, freeze, speedRef, setArray } = extraArgs;
+    const { barsRef, speedRef, setArray } = extraArgs;
     
     let pivot = arr[right];
     let pivotBar = barsRef.current![right];
