@@ -2,14 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import bubbleSort from "./algorithms/bubble";
 import quickSort from "./algorithms/quick";
 import selectionSort from "./algorithms/selection";
+import insertionSort from "./algorithms/insertion";
 import { freeze, changeColour } from "./utils";
 
 
 const initAlgorithms = [
+    'Insertion',
     'Selection',
     'Bubble',
     'Quick',
-    // 'Insertion',
     // 'Merge',
 ];
 
@@ -18,7 +19,7 @@ const Visualizer = () => {
     const [arrSize, setArrSize] = useState(30);
     const [array, setArray] = useState(new Array(arrSize));
     const [algorithms, setAlgorithms] = useState(initAlgorithms);
-    const [speed, setSpeed] = useState(50);
+    const [speed, setSpeed] = useState(500);
     const speedRef = useRef(speed);
     const [loading, setLoading] = useState(false);
     const barsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -79,6 +80,8 @@ const Visualizer = () => {
             case 'Selection':
                 selectionSort(array, barsRef, speedRef, setArray, finishAnim);
                 break
+            case 'Insertion':
+                insertionSort(array, barsRef, speedRef, setArray, finishAnim);
         }
     }
 
@@ -86,9 +89,9 @@ const Visualizer = () => {
     //* Run after sorting the array
     const finishAnim = async () => {
         for (let i = 0; i < array.length; i++) {
-            const bar = barsRef.current[i];
-            bar!.style.backgroundColor = 'green';
-            await freeze(speedRef.current);
+            const bar = barsRef.current[i]!;
+            changeColour(bar, "#008000");
+            await freeze(speedRef.current)
         }
         setLoading(false);
     }

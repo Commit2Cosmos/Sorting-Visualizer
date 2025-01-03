@@ -24,18 +24,18 @@ const partition = async (arr: number[], left: number, right: number, extraArgs) 
     const { barsRef, speedRef, setArray } = extraArgs;
     
     let pivot = arr[right];
-    let pivotBar = barsRef.current![right];
+    let pivotBar = barsRef.current[right];
     changeColour(pivotBar, "#4d88ff");
     await freeze(speedRef.current);
     
     let i = left - 1;
 
-    let barLeft = barsRef.current![i+1];
+    let barLeft = barsRef.current[i+1];
     
     for (let j = left; j < right; j++) {
         changeColour(barLeft, "#6A5ACD");
 
-        let barRight = barsRef.current![j];
+        let barRight = barsRef.current[j];
         changeColour(barRight, "#6A5ACD");
         await freeze(speedRef.current);
         
@@ -52,7 +52,7 @@ const partition = async (arr: number[], left: number, right: number, extraArgs) 
                 changeColour(barLeft);
             }
             
-            barLeft = barsRef.current![i+1];
+            barLeft = barsRef.current[i+1];
         }
         changeColour(barLeft, "#6A5ACD");
         changeColour(barRight);

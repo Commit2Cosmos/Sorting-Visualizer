@@ -12,10 +12,10 @@ const bubbleSort = async (array, barsRef, speedRef, setArray, finishAnim) => {
             sorted = true;
             for (let j = 0; j < curr.length - i - 1; j++) {
 
-                let [bar1, bar2] = [barsRef.current![j], barsRef.current![j+1]];
+                let [bar1, bar2] = [barsRef.current[j], barsRef.current[j+1]];
 
                 changeColour(bar1, "#6A5ACD");
-                changeColour(bar2, "#DC143C");
+                changeColour(bar2, "#6A5ACD");
 
                 await freeze(speedRef.current);
 
@@ -26,7 +26,7 @@ const bubbleSort = async (array, barsRef, speedRef, setArray, finishAnim) => {
                     setArray([...curr]);
                     
                     changeColour(bar1, "#DC143C");
-                    changeColour(bar2, "#6A5ACD");
+                    changeColour(bar2, "#DC143C");
         
                     await freeze(speedRef.current);
                     
