@@ -3,7 +3,8 @@ import bubbleSort from "./algorithms/bubble";
 import quickSort from "./algorithms/quick";
 import selectionSort from "./algorithms/selection";
 import insertionSort from "./algorithms/insertion";
-import { freeze, changeColour } from "./utils";
+import mergeSort from "./algorithms/merge";
+import { freeze, changeColour, colors } from "./utils";
 
 
 const initAlgorithms = [
@@ -11,7 +12,7 @@ const initAlgorithms = [
     'Selection',
     'Bubble',
     'Quick',
-    // 'Merge',
+    'Merge',
 ];
 
 const Visualizer = () => {
@@ -19,10 +20,11 @@ const Visualizer = () => {
     const [arrSize, setArrSize] = useState(30);
     const [array, setArray] = useState(new Array(arrSize));
     const [algorithms, setAlgorithms] = useState(initAlgorithms);
-    const [speed, setSpeed] = useState(500);
+    const [speed, setSpeed] = useState(200);
     const speedRef = useRef(speed);
     const [loading, setLoading] = useState(false);
     const barsRef = useRef<(HTMLDivElement | null)[]>([]);
+    const [paused, setPaused] = useState(false);
 
     //* Create a ref for each bar 
     const setBarRef = (el: HTMLDivElement | null, idx: number) => {
@@ -56,7 +58,6 @@ const Visualizer = () => {
         });
     }
 
-
     //* Reset array if size is changed
     useEffect(() => {
         randomize();
@@ -67,21 +68,35 @@ const Visualizer = () => {
     }, [speed]);
 
 
+    useEffect(() => {
+        if (paused) {
+            speedRef.current = 0;
+        } else {
+            speedRef.current = speed;
+        }
+    }, [paused]);
+
+
     //* Sort on click
     const handleSorting = () => {
+        setPaused(false);
         setLoading(true);
         switch (algorithms[0]) {
             case 'Bubble':
                 bubbleSort(array, barsRef, speedRef, setArray, finishAnim);
-                break
+                break;
             case 'Quick':
                 quickSort(array, barsRef, speedRef, setArray, finishAnim);
-                break
+                break;
             case 'Selection':
                 selectionSort(array, barsRef, speedRef, setArray, finishAnim);
-                break
+                break;
             case 'Insertion':
                 insertionSort(array, barsRef, speedRef, setArray, finishAnim);
+                break;
+            case 'Merge':
+                mergeSort(array, barsRef, speedRef, setArray, finishAnim);
+                break;
         }
     }
 
@@ -90,10 +105,11 @@ const Visualizer = () => {
     const finishAnim = async () => {
         for (let i = 0; i < array.length; i++) {
             const bar = barsRef.current[i]!;
-            changeColour(bar, "#008000");
+            changeColour(bar, colors.green);
             await freeze(speedRef.current)
         }
         setLoading(false);
+        setPaused(false);
     }
 
     //* bar number range
@@ -140,10 +156,18 @@ const Visualizer = () => {
                         })}
                     </div>
                 </div>
-                {/* Sort button */}
-                <button className="p-2 bg-orange-600 text-white hover:opacity-80 w-40 disabled:opacity-60 disabled:hover:bg-orange-600" disabled={loading} onClick={handleSorting}>
-                    Sort
-                </button>
+                {/* Sort / Pause button */}
+                {loading ? (
+                    <button className="p-2 bg-orange-600 text-white hover:opacity-80 w-40" onClick={() => setPaused(old => !old)}>
+                        {paused ? 'Resume' : 'Pause'}
+                    </button>
+                ) : (
+                    <button className="p-2 bg-orange-600 text-white hover:opacity-80 w-40" onClick={handleSorting}>
+                        {"Sort"}
+                    </button>
+                )
+
+                }
                 {/* Reset button */}
                 <button className="p-2 bg-lime-500 text-white hover:opacity-80 w-40 disabled:opacity-60 disabled:hover:bg-lime-500" disabled={loading} onClick={randomize}>
                     Reset
@@ -161,4 +185,4 @@ const Visualizer = () => {
     )
 }
 
-export default Visualizer
+export default Visualizer;

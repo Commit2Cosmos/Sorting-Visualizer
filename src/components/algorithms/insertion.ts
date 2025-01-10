@@ -1,6 +1,6 @@
 // INSERTION SORT
 
-import { changeColour, freeze } from "../utils";
+import { changeColour, freeze, colors } from "../utils";
 
 const insertionSort = async (array, barsRef, speedRef, setArray, finishAnim) => {
     let curr = [...array];
@@ -9,7 +9,7 @@ const insertionSort = async (array, barsRef, speedRef, setArray, finishAnim) => 
         
         let temp = right;
         let barRight = barsRef.current[temp];
-        changeColour(barRight, "#0000FF");
+        changeColour(barRight, colors.blue);
         await freeze(speedRef.current);
 
         for (let left = right-1; left >= 0; left--) {
@@ -20,8 +20,11 @@ const insertionSort = async (array, barsRef, speedRef, setArray, finishAnim) => 
                 changeColour(barRight);
                 temp -= 1;
                 barRight = barsRef.current[temp];
-                changeColour(barRight, "#0000FF");
+                changeColour(barRight, colors.blue);
                 await freeze(speedRef.current);
+                while (speedRef.current === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
             } else {
                 break;
             }

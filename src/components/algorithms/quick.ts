@@ -1,11 +1,11 @@
 // QUICK SORT
 
-import { changeColour, freeze } from "../utils";
+import { changeColour, freeze, colors } from "../utils";
 
 const quickSort = async (array, barsRef, speedRef, setArray, finishAnim) => {
     let curr = [...array];
 
-    const extraArgs = { barsRef, speedRef, setArray, finishAnim };
+    const extraArgs = { barsRef, speedRef, setArray };
 
     await sorts(curr, 0, curr.length - 1, extraArgs);
     finishAnim();
@@ -33,11 +33,15 @@ const partition = async (arr: number[], left: number, right: number, extraArgs) 
     let barLeft = barsRef.current[i+1];
     
     for (let j = left; j < right; j++) {
-        changeColour(barLeft, "#6A5ACD");
+        changeColour(barLeft, colors.blue);
 
         let barRight = barsRef.current[j];
-        changeColour(barRight, "#6A5ACD");
+        changeColour(barRight, colors.blue);
         await freeze(speedRef.current);
+
+        while (speedRef.current === 0) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
         
         if (arr[j] < pivot) {
             
@@ -46,15 +50,15 @@ const partition = async (arr: number[], left: number, right: number, extraArgs) 
                 [arr[i], arr[j]] = [arr[j], arr[i]];
                 setArray([...arr]);
 
-                changeColour(barLeft, "#DC143C");
-                changeColour(barRight, "#DC143C");
+                changeColour(barLeft, colors.red);
+                changeColour(barRight, colors.red);
                 await freeze(speedRef.current);
                 changeColour(barLeft);
             }
             
             barLeft = barsRef.current[i+1];
         }
-        changeColour(barLeft, "#6A5ACD");
+        changeColour(barLeft, colors.blue);
         changeColour(barRight);
         await freeze(speedRef.current);
     }
@@ -65,8 +69,8 @@ const partition = async (arr: number[], left: number, right: number, extraArgs) 
         [arr[i+1], arr[right]] = [arr[right], arr[i+1]];
         setArray([...arr]);
     
-        changeColour(barLeft, "#DC143C");
-        changeColour(pivotBar, "#DC143C");
+        changeColour(barLeft, colors.red);
+        changeColour(pivotBar, colors.red);
         await freeze(speedRef.current);
         
         changeColour(barLeft);

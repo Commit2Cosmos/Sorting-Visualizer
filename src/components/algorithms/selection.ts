@@ -1,6 +1,6 @@
 // SELECTION SORT
 
-import { changeColour, freeze } from "../utils";
+import { changeColour, freeze, colors } from "../utils";
 
 const selectionSort = async (array, barsRef, speedRef, setArray, finishAnim) => {
     let curr = [...array];
@@ -8,7 +8,7 @@ const selectionSort = async (array, barsRef, speedRef, setArray, finishAnim) => 
     for (let left = 0; left < curr.length-1; left++) {
         let [minVal, minIdx] = [curr[left], left];
         let barLeft = barsRef.current[left];
-        changeColour(barLeft, "#33ff3c");
+        changeColour(barLeft, colors.green);
         await freeze(speedRef.current)
 
         let barMin;
@@ -16,21 +16,25 @@ const selectionSort = async (array, barsRef, speedRef, setArray, finishAnim) => 
         for (let right = left+1; right < curr.length; right++) {
             let barRight = barsRef.current[right];
 
-            changeColour(barRight, "#6A5ACD");
+            changeColour(barRight, colors.blue);
             await freeze(speedRef.current)
+            
+            while (speedRef.current === 0) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
 
             if (curr[right] < minVal) {
                 minVal = curr[right];
                 minIdx = right;
 
                 if (!barMin) {
-                    changeColour(barLeft, "#4d88ff");
+                    changeColour(barLeft, colors.lightBlue);
                 } else {
                     changeColour(barMin);
                 }
 
                 barMin = barsRef.current[right];
-                changeColour(barMin, "#33ff3c");
+                changeColour(barMin, colors.green);
                 await freeze(speedRef.current);
             } else {
                 changeColour(barRight);
@@ -38,8 +42,8 @@ const selectionSort = async (array, barsRef, speedRef, setArray, finishAnim) => 
             }
         }
         if (barMin) {
-            changeColour(barMin, "#DC143C");
-            changeColour(barLeft, "#DC143C");
+            changeColour(barMin, colors.red);
+            changeColour(barLeft, colors.red);
             
             [curr[left], curr[minIdx]] = [curr[minIdx], curr[left]];
             setArray([...curr]);
@@ -49,7 +53,6 @@ const selectionSort = async (array, barsRef, speedRef, setArray, finishAnim) => 
         }
         changeColour(barLeft);
     }
-
     finishAnim();
 }
 
