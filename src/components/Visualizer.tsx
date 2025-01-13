@@ -8,16 +8,25 @@ import { freeze, changeColour, colors } from "./utils";
 
 
 const initAlgorithms = [
+    'Merge',
+    'Quick',
     'Insertion',
     'Selection',
     'Bubble',
-    'Quick',
-    'Merge',
 ];
+
+//* bar number range
+const min_bars = 10;
+const max_bars = 100;
+
+
+//* speed range (ms)
+const min_speed = 1;
+const max_speed = 500;
 
 const Visualizer = () => {
 
-    const [arrSize, setArrSize] = useState(30);
+    const [arrSize, setArrSize] = useState(10);
     const [array, setArray] = useState(new Array(arrSize));
     const [algorithms, setAlgorithms] = useState(initAlgorithms);
     const [speed, setSpeed] = useState(200);
@@ -25,6 +34,7 @@ const Visualizer = () => {
     const [loading, setLoading] = useState(false);
     const barsRef = useRef<(HTMLDivElement | null)[]>([]);
     const [paused, setPaused] = useState(false);
+    const cancelRef = useRef(false);
 
     //* Create a ref for each bar 
     const setBarRef = (el: HTMLDivElement | null, idx: number) => {
@@ -33,17 +43,22 @@ const Visualizer = () => {
 
     
     //* Generate new array
-    const randomize = () => {
+    const randomize = async () => {
         const min = 5;
         const max = 100;
         let arr: number[] = new Array(arrSize).fill(0).map(() => Math.floor(Math.random() * (max - min + 1) + min));
         setArray(arr);
+        setLoading(false);
+        setPaused(false);
+        
+        cancelRef.current = true;
 
-        barsRef.current.forEach((bar) => {
+        for (const bar of barsRef.current) {
             if (bar) {
                 changeColour(bar);
+                await new Promise(resolve => setTimeout(resolve, 0));
             }
-        });
+        }
     }
 
 
@@ -60,7 +75,10 @@ const Visualizer = () => {
 
     //* Reset array if size is changed
     useEffect(() => {
-        randomize();
+        const asyncRandomize = async () => {
+            await randomize();
+        };
+        asyncRandomize();
     }, [arrSize])
 
     useEffect(() => {
@@ -79,23 +97,24 @@ const Visualizer = () => {
 
     //* Sort on click
     const handleSorting = () => {
+        cancelRef.current = false;
         setPaused(false);
         setLoading(true);
         switch (algorithms[0]) {
             case 'Bubble':
-                bubbleSort(array, barsRef, speedRef, setArray, finishAnim);
+                bubbleSort(array, barsRef, speedRef, setArray, finishAnim, cancelRef);
                 break;
             case 'Quick':
-                quickSort(array, barsRef, speedRef, setArray, finishAnim);
+                quickSort(array, barsRef, speedRef, setArray, finishAnim, cancelRef);
                 break;
             case 'Selection':
-                selectionSort(array, barsRef, speedRef, setArray, finishAnim);
+                selectionSort(array, barsRef, speedRef, setArray, finishAnim, cancelRef);
                 break;
             case 'Insertion':
-                insertionSort(array, barsRef, speedRef, setArray, finishAnim);
+                insertionSort(array, barsRef, speedRef, setArray, finishAnim, cancelRef);
                 break;
             case 'Merge':
-                mergeSort(array, barsRef, speedRef, setArray, finishAnim);
+                mergeSort(array, barsRef, speedRef, setArray, finishAnim, cancelRef);
                 break;
         }
     }
@@ -104,22 +123,22 @@ const Visualizer = () => {
     //* Run after sorting the array
     const finishAnim = async () => {
         for (let i = 0; i < array.length; i++) {
+            while (speedRef.current === 0) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            if (cancelRef.current) break;
             const bar = barsRef.current[i]!;
             changeColour(bar, colors.green);
             await freeze(speedRef.current)
         }
+        for (let i = 0; i < array.length; i++) {
+            const bar = barsRef.current[i]!;
+            changeColour(bar);
+        }
         setLoading(false);
         setPaused(false);
+        cancelRef.current = true;
     }
-
-    //* bar number range
-    const min_bars = 10;
-    const max_bars = 100;
-
-
-    //* speed range (ms)
-    const min_speed = 1;
-    const max_speed = 500;
     
 
     return (
@@ -150,7 +169,7 @@ const Visualizer = () => {
                 {/* Dropdown selection */}
                 <div className="relative bg-green-700 w-40 group hover:bg-emerald-500">
                     <p className="p-2 text-center">{algorithms[0]} Sort</p>
-                    <div className="absolute top-0 -translate-y-full hidden bg-[#f1f1f1] z-10 w-full group-hover:block" id="group">
+                    <div className={`absolute top-0 -translate-y-full bg-[#f1f1f1] z-10 hidden w-full ${loading ? "" : "group-hover:block"}`} id="group">
                         {algorithms.filter(sort => sort !== algorithms[0]).map((alg, index) => {
                             return <button key={index} disabled={loading} className="w-full text-black p-2 block hover:bg-slate-600 hover:text-white" onClick={() => handleAlgo(alg)}>{alg} Sort</button>
                         })}
@@ -169,7 +188,7 @@ const Visualizer = () => {
 
                 }
                 {/* Reset button */}
-                <button className="p-2 bg-lime-500 text-white hover:opacity-80 w-40 disabled:opacity-60 disabled:hover:bg-lime-500" disabled={loading} onClick={randomize}>
+                <button className="p-2 bg-lime-500 text-white hover:opacity-80 w-40 disabled:opacity-60 disabled:hover:bg-lime-500" disabled={loading && !paused} onClick={async () => await randomize()}>
                     Reset
                 </button>
             </div>
@@ -177,7 +196,7 @@ const Visualizer = () => {
                 <p>Speed</p>
                 <div className="w-full flex justify-center">
                     <p className="dial">Slow</p>
-                    <input className="mx-5 w-2/5" type="range" min={min_speed} max={max_speed} value={max_speed - (speed - min_speed)} onChange={(e) => setSpeed(max_speed - (parseInt(e.target.value) - min_speed))} />
+                    <input className="mx-5 w-2/5" disabled={paused} type="range" min={min_speed} max={max_speed} value={max_speed - (speed - min_speed)} onChange={(e) => setSpeed(max_speed - (parseInt(e.target.value) - min_speed))} />
                     <p className="dial">Fast</p>
                 </div>
             </div>

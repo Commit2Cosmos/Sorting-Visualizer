@@ -2,19 +2,19 @@
 
 import { changeColour, freeze } from "../utils";
 
-const mergeSort = async (array, barsRef, speedRef, setArray, finishAnim) => {
+const mergeSort = async (array, barsRef, speedRef, setArray, finishAnim, cancelRef) => {
     let curr = [...array];
 
-    const extraArgs = { barsRef, speedRef, setArray, finishAnim };
+    const extraArgs = { barsRef, speedRef, setArray, finishAnim, cancelRef };
 
     await merge(curr, 0, curr.length, extraArgs);
-
+    if (extraArgs.cancelRef.current) return;
     finishAnim();
 }
     
 const merge = async (arr: number[], start: number, finish: number, extraArgs) => {
     let len = finish - start;
-    if (len == 1) {
+    if (len == 1 || extraArgs.cancelRef.current) {
         return;
     }
 
@@ -27,7 +27,7 @@ const merge = async (arr: number[], start: number, finish: number, extraArgs) =>
 
 
 const sort = async (arr: number[], start: number, mid: number, finish: number, extraArgs) => {
-    const { barsRef, speedRef, setArray } = extraArgs;
+    const { barsRef, speedRef, setArray, cancelRef } = extraArgs;
 
     let left = arr.slice(start, mid);
     let right = arr.slice(mid, finish);
@@ -35,6 +35,7 @@ const sort = async (arr: number[], start: number, mid: number, finish: number, e
     let i = start, j = 0, k = 0;
 
     while (j < left.length && k < right.length) {
+        if (cancelRef.current) return;
 
         let leftBar = barsRef.current[i];
         let rightBar = barsRef.current[i+left.length-j];
@@ -57,6 +58,7 @@ const sort = async (arr: number[], start: number, mid: number, finish: number, e
             k++;
 
             changeColour(rightBar);
+            if (extraArgs.cancelRef.current) return;
             rightBar = barsRef.current[i];
             changeColour(rightBar, "#4d88ff");
             changeColour(leftBar, "#DC143C");

@@ -2,7 +2,7 @@
 
 import { changeColour, freeze, colors } from "../utils";
 
-const insertionSort = async (array, barsRef, speedRef, setArray, finishAnim) => {
+const insertionSort = async (array, barsRef, speedRef, setArray, finishAnim, cancelRef) => {
     let curr = [...array];
 
     for (let right = 1; right < curr.length; right++) {
@@ -13,6 +13,7 @@ const insertionSort = async (array, barsRef, speedRef, setArray, finishAnim) => 
         await freeze(speedRef.current);
 
         for (let left = right-1; left >= 0; left--) {
+            if (cancelRef.current) return;
             if (curr[temp] < curr[left]) {
                 [curr[temp], curr[left]] = [curr[left], curr[temp]];
                 setArray([...curr]);

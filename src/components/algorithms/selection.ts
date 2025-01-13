@@ -2,7 +2,7 @@
 
 import { changeColour, freeze, colors } from "../utils";
 
-const selectionSort = async (array, barsRef, speedRef, setArray, finishAnim) => {
+const selectionSort = async (array, barsRef, speedRef, setArray, finishAnim, cancelRef) => {
     let curr = [...array];
 
     for (let left = 0; left < curr.length-1; left++) {
@@ -14,6 +14,8 @@ const selectionSort = async (array, barsRef, speedRef, setArray, finishAnim) => 
         let barMin;
 
         for (let right = left+1; right < curr.length; right++) {
+            if (cancelRef.current) return;
+
             let barRight = barsRef.current[right];
 
             changeColour(barRight, colors.blue);

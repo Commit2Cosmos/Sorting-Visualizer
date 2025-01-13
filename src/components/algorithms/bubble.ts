@@ -2,11 +2,12 @@
 
 import { changeColour, freeze, colors } from "../utils";
 
-const bubbleSort = async (array, barsRef, speedRef, setArray, finishAnim) => {
+const bubbleSort = async (array, barsRef, speedRef, setArray, finishAnim, cancelRef) => {
     let curr = [...array];
         
     for (let i = 0; i < curr.length - 1; i++) {
         for (let j = 0; j < curr.length - i - 1; j++) {
+            if (cancelRef.current) return;
 
             let [bar1, bar2] = [barsRef.current[j], barsRef.current[j+1]];
 

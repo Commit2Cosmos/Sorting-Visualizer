@@ -2,26 +2,28 @@
 
 import { changeColour, freeze, colors } from "../utils";
 
-const quickSort = async (array, barsRef, speedRef, setArray, finishAnim) => {
+const quickSort = async (array, barsRef, speedRef, setArray, finishAnim, cancelRef) => {
     let curr = [...array];
 
-    const extraArgs = { barsRef, speedRef, setArray };
+    const extraArgs = { barsRef, speedRef, setArray, cancelRef };
 
     await sorts(curr, 0, curr.length - 1, extraArgs);
+    if (extraArgs.cancelRef.current) return;
     finishAnim();
 }
     
 const sorts = async (arr, left, right, extraArgs) => {
+    if (extraArgs.cancelRef.current) return;
     if (left < right) {
-        let partitionIndex = await partition(arr, left, right, extraArgs);    
-
+        let partitionIndex = await partition(arr, left, right, extraArgs);
+        
         await sorts(arr, partitionIndex + 1, right, extraArgs)
         await sorts(arr, left, partitionIndex - 1, extraArgs)
     }
 }
 
 const partition = async (arr: number[], left: number, right: number, extraArgs) => {
-    const { barsRef, speedRef, setArray } = extraArgs;
+    const { barsRef, speedRef, setArray, cancelRef } = extraArgs;
     
     let pivot = arr[right];
     let pivotBar = barsRef.current[right];
@@ -33,6 +35,8 @@ const partition = async (arr: number[], left: number, right: number, extraArgs) 
     let barLeft = barsRef.current[i+1];
     
     for (let j = left; j < right; j++) {
+        if (cancelRef.current) return;
+
         changeColour(barLeft, colors.blue);
 
         let barRight = barsRef.current[j];
@@ -47,6 +51,7 @@ const partition = async (arr: number[], left: number, right: number, extraArgs) 
             
             i++;
             if (i!=j) {
+                if (cancelRef.current) return;
                 [arr[i], arr[j]] = [arr[j], arr[i]];
                 setArray([...arr]);
 
@@ -58,14 +63,17 @@ const partition = async (arr: number[], left: number, right: number, extraArgs) 
             
             barLeft = barsRef.current[i+1];
         }
+        if (cancelRef.current) return;
         changeColour(barLeft, colors.blue);
         changeColour(barRight);
         await freeze(speedRef.current);
     }
 
+    if (cancelRef.current) return;
     changeColour(barLeft);
 
     if (i+1 != right) {
+        if (cancelRef.current) return;
         [arr[i+1], arr[right]] = [arr[right], arr[i+1]];
         setArray([...arr]);
     
